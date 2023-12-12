@@ -1,4 +1,4 @@
-# Node.js Sample App
+# Node.js population-extinction-map App
 
 ```cf push```
 
