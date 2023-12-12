@@ -1,5 +1,5 @@
 {
-  "name": "cf-nodejs",
+  "name": "population-extinction-map",
   "version": "1.0.0",
   "dependencies": {
     "bootstrap": "^5.3.2",
