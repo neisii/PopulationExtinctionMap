@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>시군구별 지역소멸지도</title>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+      integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=550l8kcynf&submodules=drawing"
+    ></script>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-grid.min.css" />
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-reboot.min.css" />
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- google font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "GmarketSansMedium";
+        src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff")
+          format("woff");
+        font-weight: normal;
+        font-style: normal;
+      }
+      * {
+        font-family: "GmarketSansMedium", "Noto Serif KR", serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="margin-top: 20px">
+      <div class="container">
+        <div class="row align-items-start">
+          <div class="col-8">
+            <h1>시군구별 지역소멸지도</h1>
+          </div>
+          <div class="col-4">
+            <div class="d-flex flex-row-reverse">
+              <div class="p-2">
+                <button type="button" class="btn btn-info" id="manageButton">
+                  정책 데이터 등록
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <h5>
+              (각 지역별 소멸위험도, 요인 및 대응책 기준, 인구소멸방지책 정보
+              제공 서비스)
+            </h5>
+          </div>
+        </div>
+
+        <div class="row justify-content-md-center">
+          <div class="col col-sm-auto" id="legendCol" style="font-size: 12px">
+            <p class="mb-0"><span style="color: #a6ce39">■</span>소멸무관</p>
+            <p class="mb-0"><span style="color: #fff205">■</span>소멸안심</p>
+            <p class="mb-0"><span style="color: #f8901f">■</span>소멸주의</p>
+            <p class="mb-0"><span style="color: #ee1c25">■</span>소멸진입</p>
+            <p class="mb-0"><span style="color: #a3054a">■</span>소멸우려</p>
+            <p class="mb-0"><span style="color: #891a1e">■</span>소멸위험</p>
+          </div>
+          <div class="col-7" id="mapCol">
+            <div id="map" style="width: auto; height: 620px"></div>
+          </div>
+          <div class="col" id="dataCol">
+            <div class="row mb-3" style="border-bottom: 3px solid #200030">
+              <h3 id="admName">&nbsp;</h3>
+            </div>
+            <div class="d-flex flex-column mb-4">
+              <span>■소멸위험도:<span id="indicesLevel"></span></span>
+
+              <span>■지역소멸요인: <span id="cause"></span></span>
+
+              <span
+                >■요인 별 기준 대응책: <span id="countermeasures"></span
+              ></span>
+
+              <span>■인구수: <span id="population"></span>명</span>
+            </div>
+            <div class="row mb-3">
+              <h6>■시행 중/예정인 인구소멸방지책</h6>
+              <table class="table table-striped border-top table-hover">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">정책명</th>
+                    <th scope="col">링크</th>
+                  </tr>
+                </thead>
+                <tbody id="dataList"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 시군구 경계 좌표 불러오기
+      var HOME_PATH = window.HOME_PATH || ".",
+        urlPrefix = HOME_PATH + "/data",
+        urlSuffix = ".json",
+        admGeoList = [],
+        loadCount = 0;
+
+      // 지도 영역 제한
+      var maxBoundary = new naver.maps.LatLngBounds(
+        new naver.maps.LatLng(34.0496, 130.6794),
+        new naver.maps.LatLng(38.1126, 125.1953)
+      );
+
+      // 지도 설정
+      var map = new naver.maps.Map(document.getElementById("map"), {
+        zoom: 8,
+        mapTypeId: "normal",
+        center: new naver.maps.LatLng(36.4203004, 128.31796),
+        maxBounds: maxBoundary,
+        baseTileOpacity: 0,
+      });
+
+      // 시군구경계 그리기
+      const countLimit = 251;
+      const sigCount = 250;
+      naver.maps.Event.once(
+        map,
+        "init",
+        loadEnum(),
+        loadAdmInformation(),
+        getExtinctionLevel(),
+        getAdmBoundaryPoint()
+      );
+      var admName = $(document.getElementById("admName"));
+      var indicesLevel = $(document.getElementById("indicesLevel"));
+      var cause = $(document.getElementById("cause"));
+      var countermeasures = $(document.getElementById("countermeasures"));
+      var population = $(document.getElementById("population"));
+      var policyTbody = $(document.getElementById("dataList"));
+
+      // 이벤트
+      var tooltip = $(
+        '<div style="position:absolute;width:auto;z-index:1000;padding:5px 10px;background-color:#fff;border:solid 2px #000;font-size:14px;pointer-events:none;display:none;"></div>'
+      );
+
+      tooltip.appendTo(map.getPanes().floatPane);
+
+      // 마우스 클릭 시 우측 영역에 지역정보 출력한다
+      map.data.addListener("click", function (e) {
+        var feature = e.feature;
+        var adm_cd = feature.getProperty("SIG_CD");
+        var adm_nm = feature.getProperty("SIG_KOR_NM");
+
+        var policyListElement = "";
+
+        $.each(dataLoader.adm_info, function (k, v) {
+          if (adm_cd == v.adm_cd) {
+            console.log(v);
+            admName.text(v.adm_nm + "(" + v.adm_cd + ")"); // 지역명 출력
+            population.text(v.population); // 인구수 출력
+            indicesLevel.text(v.indicesLevel); // 위험도 출력
+            $.each(dataLoader.enum.cause, function (cause_k, cause_v) {
+              // 원인코드 중복 제거
+              if (cause_v.code == v.cause_cd) {
+                console.log(cause_v.description);
+                v.cause_description = cause_v.description;
+                return false;
+              }
+            });
+            $.each(
+              dataLoader.enum.countermeasure,
+              function (countermeasure_k, countermeasure_v) {
+                // 원인코드 중복 제거
+                if (countermeasure_v.code == v.countermeasure_cd) {
+                  v.countermeasure_description = countermeasure_v.description;
+                  return false;
+                }
+              }
+            );
+
+            cause.text(v.cause_description); // 원인 출력
+            countermeasures.text(v.countermeasure_description); // 대응책 출력
+
+            // 정책 목록 출력하기
+            policyTbody.html("");
+            $.each(dataLoader.adm_policy, function (pk, pv) {
+              if (pv.adm_cd == v.adm_cd) {
+                policyListElement +=
+                  "<tr><th scope='row'>" +
+                  pv._pk +
+                  "</th><td>" +
+                  pv.title +
+                  "</td><td><a href='" +
+                  pv.url +
+                  "' target='_blank' class=\"link-primary\">바로가기</a></td></tr>";
+              }
+            });
+
+            policyTbody.append(policyListElement);
+          }
+        });
+
+        if (feature.getProperty("focus") !== true) {
+          feature.setProperty("focus", true);
+        } else {
+          feature.setProperty("focus", false);
+        }
+      });
+
+      // 마우스 다운 시
+      map.data.addListener("mousedown", function (e) {
+        var feature = e.feature;
+        var adm_cd = feature.getProperty("SIG_CD");
+        var adm_nm = feature.getProperty("SIG_KOR_NM");
+      });
+
+      // 마우스 오버 시
+      map.data.addListener("mouseover", function (e) {
+        var feature = e.feature;
+        var adm_nm = feature.getProperty("SIG_KOR_NM");
+
+        tooltip
+          .css({
+            display: "",
+            left: e.offset.x + 10,
+            top: e.offset.y,
+          })
+          .html(adm_nm);
+
+        map.data.overrideStyle(feature, {
+          fillOpacity: 1,
+          strokeWeight: 4,
+          strokeOpacity: 1,
+        });
+      });
+
+      map.data.addListener("mouseout", function (e) {
+        tooltip.hide().empty();
+        map.data.revertStyle();
+      });
+
+      // 공통 코드 가져오기
+      var dataLoader = {
+        extinction_cd: undefined,
+        adm_info: undefined,
+        adm_policy: undefined,
+        enum: {
+          cause: { code: undefined, description: undefined },
+          countermeasure: { code: undefined, description: undefined },
+        },
+      };
+
+      function loadAdmInformation() {
+        $.ajax({
+          url: urlPrefix + "/adm_data/adm_information" + urlSuffix,
+          success: function (data) {
+            dataLoader.adm_info = data;
+            loadPolicies();
+          },
+        });
+      }
+
+      // 소멸 레벨 가져오기
+      var extinctionLevelList = [];
+      function getExtinctionLevel(callback) {
+        $.ajax({
+          // url: urlPrefix + "/common/extinction" + urlSuffix,
+          url: "http://223.130.129.189:9999/api/v1/produce/schema/data/List?userId=dhkdhk32&tableName=extinction&pageNumber=1&pageSize=10&transferedDataYn=false",
+          success: function (data) {
+            dataLoader.extinction_cd = data.result;
+          },
+        });
+      }
+
+      // 경계 그리기
+      function getAdmBoundaryPoint() {
+        for (var i = 1; i < countLimit; i++) {
+          var keyword = "/adm_point/adm_point_" + i;
+          if (keyword.length === 1) {
+            keyword = keyword;
+          }
+          $.ajax({
+            url: urlPrefix + keyword + urlSuffix,
+            success: (function (idx) {
+              return function (geojson) {
+                admGeoList[idx] = geojson;
+                loadCount++;
+                if (loadCount === sigCount) {
+                  startDataLayer();
+                }
+              };
+            })(i - 1),
+          });
+        }
+      }
+
+      // TODO 지역 별 폴리곤 레이블 달기
+      // https://navermaps.github.io/maps.js.ncp/docs/tutorial-3-InfoWindow.html
+
+      // 소멸위험 레벨 별 컬러링
+      function startDataLayer() {
+        console.log("소멸위험 레벨 별 컬러링");
+        map.data.setStyle(function (feature) {
+          var adm_cd = feature.getProperty("SIG_CD");
+          var adm_nm = feature.getProperty("SIG_KOR_NM");
+
+          var styleOptions = {
+            fillColor: "#0f0",
+            fillOpacity: 1,
+            strokeColor: "#0f0",
+            strokeWeight: 2,
+            strokeOpacity: 1,
+          };
+
+          // // 지수 가져오고
+          $.each(dataLoader.adm_info, function (k, v) {
+            if (adm_cd == v.adm_cd) {
+              v.indices_value;
+
+              $.each(dataLoader.extinction_cd, function (elk, elv) {
+                if (
+                  v.indices_value >= elv.range_min &&
+                  v.indices_value < elv.range_max
+                ) {
+                  v.indicesLevel = elv.level_label;
+                  v.bgColor = elv.bg_color;
+                  v.borderColor = elv.border_color;
+                  return false;
+                }
+              });
+
+              styleOptions.fillColor = v.bgColor;
+              styleOptions.strokeColor = v.borderColor;
+              return false;
+            }
+          });
+
+          if (feature.getProperty("focus")) {
+            styleOptions.strokeWeight = 4;
+            styleOptions.strokeOpacity = 1;
+          }
+          return styleOptions;
+        });
+
+        admGeoList.forEach(function (geojson) {
+          map.data.addGeoJson(geojson);
+        });
+      }
+
+      // 정책 가져오기
+      function loadPolicies() {
+        $.ajax({
+          // url: urlPrefix + "/adm_data/adm_policy" + urlSuffix,
+          url: "http://223.130.129.189:9999/api/v1/produce/schema/data/List?userId=dhkdhk32&tableName=adm_policy&pageNumber=1&pageSize=100&transferedDataYn=false",
+          success: function (data) {
+            dataLoader.adm_policy = data.result;
+          },
+        });
+      }
+
+      function loadEnum() {
+        $.ajax({
+          url: urlPrefix + "/adm_data/cause_cd" + urlSuffix,
+          // url: "http://223.130.129.189:9999/api/v1/produce/schema/data/List?userId=dhkdhk32&tableName=&pageNumber=1&pageSize=100&transferedDataYn=false",
+          success: function (data) {
+            dataLoader.enum.cause = data;
+          },
+        });
+        $.ajax({
+          url: urlPrefix + "/adm_data/countermeasure_cd" + urlSuffix,
+          // url: "http://223.130.129.189:9999/api/v1/produce/schema/data/List?userId=dhkdhk32&tableName=&pageNumber=1&pageSize=100&transferedDataYn=false",
+          success: function (data) {
+            dataLoader.enum.countermeasure = data;
+          },
+        });
+      }
+      
+      // 정책 데이터 등록 페이지로 이동
+      document
+        .getElementById("manageButton")
+        .addEventListener("click", function () {
+          window.location.href = "/manage/policy.html";
+        });
+    </script>
+  </body>
+</html>

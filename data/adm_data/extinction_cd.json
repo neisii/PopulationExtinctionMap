@@ -1,0 +1,50 @@
+[
+  {
+    "extinction_level": 1,
+    "level_label": "소멸무관",
+    "range_min": 1.5,
+    "range_max": 3.0,
+    "bg_color": "#A6CE39",
+    "border_color": "#37AC0D"
+  },
+  {
+    "extinction_level": 2,
+    "level_label": "소멸안심",
+    "range_min": 1.25,
+    "range_max": 1.5,
+    "bg_color": "#FFF205",
+    "border_color": "#BCC028"
+  },
+  {
+    "extinction_level": 3,
+    "level_label": "소멸주의",
+    "range_min": 1,
+    "range_max": 1.25,
+    "bg_color": "#F8901F",
+    "border_color": "#9E580B"
+  },
+  {
+    "extinction_level": 4,
+    "level_label": "소멸진입",
+    "range_min": 0.75,
+    "range_max": 1,
+    "bg_color": "#EE1C25",
+    "border_color": "#BB0000"
+  },
+  {
+    "extinction_level": 5,
+    "level_label": "소멸우려",
+    "range_min": 0.5,
+    "range_max": 0.75,
+    "bg_color": "#A3054A",
+    "border_color": "#6A2D98"
+  },
+  {
+    "extinction_level": 6,
+    "level_label": "소멸위험",
+    "range_min": 0.0,
+    "range_max": 0.5,
+    "bg_color": "#891A1E",
+    "border_color": "#711E2A"
+  }
+]

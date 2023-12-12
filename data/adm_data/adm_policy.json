@@ -1,0 +1,86 @@
+[
+  {
+    "adm_cd": 33530,
+    "title": "옥천 정책1",
+    "url": "http://111.com/33530/1",
+    "map_cd": 3
+  },
+  {
+    "adm_cd": 33530,
+    "title": "옥천 정책2",
+    "url": "http://111.com/33530/2",
+    "map_cd": 3
+  },
+  {
+    "adm_cd": 33530,
+    "title": "옥천 정책3",
+    "url": "http://111.com/33530/3",
+    "map_cd": 3
+  },
+  {
+    "adm_cd": 33530,
+    "title": "옥천 정책4",
+    "url": "http://111.com/33530/4",
+    "map_cd": 3
+  },
+  {
+    "adm_cd": 33530,
+    "title": "옥천 정책5",
+    "url": "http://111.com/33530/5",
+    "map_cd": 3
+  },
+  {
+    "adm_cd": 33530,
+    "title": "옥천 정책6",
+    "url": "http://111.com/33530/6",
+    "map_cd": 3
+  },
+  {
+    "adm_cd": 33530,
+    "title": "옥천 정책7",
+    "url": "http://111.com/33530/7",
+    "map_cd": 3
+  },
+  {
+    "adm_cd": 32540,
+    "title": "평창군 정책1",
+    "url": "http://111.com/32540/1",
+    "map_cd": 1
+  },
+  {
+    "adm_cd": 32540,
+    "title": "평창군 정책2",
+    "url": "http://111.com/32540/2",
+    "map_cd": 1
+  },
+  {
+    "adm_cd": 37050,
+    "title": "구미시 정책1",
+    "url": "http://111.com/37050/1",
+    "map_cd": 4
+  },
+  {
+    "adm_cd": 37050,
+    "title": "구미시 정책2",
+    "url": "http://111.com/37050/2",
+    "map_cd": 4
+  },
+  {
+    "adm_cd": 37050,
+    "title": "구미시 정책3",
+    "url": "http://111.com/37050/3",
+    "map_cd": 4
+  },
+  {
+    "adm_cd": 37050,
+    "title": "구미시 정책4",
+    "url": "http://111.com/37050/4",
+    "map_cd": 4
+  },
+  {
+    "adm_cd": 35030,
+    "title": "익산시 정책1",
+    "url": "http://111.com/35030/1",
+    "map_cd": 2
+  }
+]

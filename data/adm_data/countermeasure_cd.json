@@ -1,0 +1,22 @@
+[
+  {
+    "code": 1,
+    "description": "양질의 일자리 창출 정책"
+  },
+  {
+    "code": 2,
+    "description": "문화/복지/생활 편의 시설 구축"
+  },
+  {
+    "code": 3,
+    "description": "청년 취업/창업 정책"
+  },
+  {
+    "code": 4,
+    "description": "주택 자금 관련 정책"
+  },
+  {
+    "code": 5,
+    "description": "사업장 고용 지원 정책"
+  }
+]
