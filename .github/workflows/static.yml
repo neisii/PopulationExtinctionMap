@@ -31,8 +31,8 @@ jobs:
       - name: Prepare site contents
         run: |
           mkdir public
-          cp html/index.html public/
-          cp -r js public/
+          cp html public/
+          cp -r app public/
           cp -r data public/
 
       - name: Upload artifact
