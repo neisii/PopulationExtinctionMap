@@ -31,9 +31,9 @@ jobs:
       - name: Prepare site contents
         run: |
           mkdir public
-          cp html public/
-          cp -r app public/
-          cp -r data public/
+          cp ./html public/
+          cp -r ./app public/
+          cp -r ./data public/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
